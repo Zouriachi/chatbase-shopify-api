@@ -20,7 +20,7 @@ def order_status():
     if order_number:
         url += f"?name=#{order_number}"
     elif email:
-        url += f"?email={email}"
+        url += f"?status=any&email={email}"
 
     response = requests.get(url)
 
