@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 SHOPIFY_API_KEY = "8480b6a17827488c54a88c4625269947"
 SHOPIFY_PASSWORD = "508abc1de832ed973abcf5878fd55ee0"
-SHOP_NAME = "dwirty.myshopify.com"
+SHOP_NAME = "conedmar.myshopify.com"
 
 @app.route('/order-status', methods=['GET'])
 def order_status():
