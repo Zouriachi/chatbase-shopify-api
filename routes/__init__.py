@@ -1,4 +1,4 @@
-from .commandes import commandes_bp
+from .order_status import order_status
+from .products import products
 
-all_routes = [commandes_bp]
 
