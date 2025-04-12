@@ -1,93 +1,86 @@
-
 from flask import Flask, request, jsonify
-import requests
 import os
-from urllib.parse import unquote
+import requests
 
 app = Flask(__name__)
 
-SHOPIFY_ADMIN_TOKEN = os.environ.get("SHOPIFY_ADMIN_TOKEN")
-SHOPIFY_API_KEY = os.environ.get("SHOPIFY_API_KEY")
-SHOPIFY_STORE_NAME = os.environ.get("SHOPIFY_STORE_NAME")
-SHOPIFY_API_VERSION = "2023-10"
-
-HEADERS = {
-    "Content-Type": "application/json",
-    "X-Shopify-Access-Token": SHOPIFY_ADMIN_TOKEN
-}
-
 def normalize_phone(phone):
-     if not phone:
+    if not phone:
         return ""
     return ''.join(filter(str.isdigit, phone))
 
-    phone = ''.join(filter(str.isdigit, phone))  # Remove non-digits
-    if phone.startswith('0'):
-        phone = '+212' + phone[1:]
-    elif phone.startswith('212'):
-        phone = '+212' + phone[3:]
-    elif not phone.startswith('+'):
-        phone = '+' + phone
-    return phone
+def get_shopify_order(order_number):
+    shop_name = os.environ.get("SHOPIFY_STORE_NAME")
+    admin_token = os.environ.get("SHOPIFY_ADMIN_TOKEN")
+    
+    url = f"https://{shop_name}.myshopify.com/admin/api/2023-10/orders.json?name=#{order_number}"
+    headers = {
+        "X-Shopify-Access-Token": admin_token,
+        "Content-Type": "application/json"
+    }
+
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        return response.json().get("orders", [])
+    return []
+
+def format_order_response(order):
+    number = order.get("name")
+    status = order.get("fulfillment_status") or "Non traitée"
+    total_price = order.get("total_price")
+    customer = order.get("customer", {})
+    client_name = customer.get("first_name", "") + " " + customer.get("last_name", "")
+    email = customer.get("email", "")
+
+    line_items = [
+        f"{item.get('name')}" for item in order.get("line_items", [])
+    ]
+
+    shipping_lines = order.get("shipping_lines", [])
+    tracking_number = None
+    if shipping_lines:
+        tracking_info = shipping_lines[0].get("tracking_numbers")
+        if tracking_info:
+            tracking_number = tracking_info[0]
+
+    return {
+        "commande": number,
+        "statut": status,
+        "total": f"{total_price} MAD",
+        "client": client_name,
+        "email": email,
+        "articles": line_items,
+        "tracking_number": tracking_number
+    }
 
 @app.route("/order-status", methods=["GET"])
 def get_order_status():
-    order_number = unquote(request.args.get("order_number", ""))
-    phone = unquote(request.args.get("phone", ""))
-
-    client = order.get("customer")
-    if not client:
-    return jsonify({"message": "Impossible de retrouver le client."}), 404
+    order_number = request.args.get("order_number")
+    phone = request.args.get("phone")
 
     if not order_number:
-        return jsonify({"error": "order_number is required"}), 400
+        return jsonify({"message": "Numéro de commande requis."}), 400
 
-    if not order_number.startswith("#"):
-        order_number = f"#{order_number}"
-
-    url = f"https://{SHOPIFY_STORE_NAME}.myshopify.com/admin/api/{SHOPIFY_API_VERSION}/orders.json?name={order_number}"
-
-    response = requests.get(url, headers=HEADERS)
-    if response.status_code != 200:
-        return jsonify({"error": "Failed to fetch order data"}), response.status_code
-
-    orders = response.json().get("orders", [])
+    orders = get_shopify_order(order_number)
     if not orders:
-        return jsonify({"message": "Aucune commande trouvée avec ce numéro."}), 200
+        return jsonify({"message": "Aucune commande trouvée."}), 404
 
     order = orders[0]
-    statut = order.get("fulfillment_status", "Non traitée") or "Non traitée"
-    client = order.get("customer", {})
-    client_phone = normalize_phone(client.get("phone", ""))
-    articles = [line.get("name", "") for line in order.get("line_items", [])]
-    total = order.get("total_price", "0.00")
-    tracking_info = ""
 
-    if order.get("fulfillments"):
-        fulfillment = order["fulfillments"][0]
-        tracking_info = fulfillment.get("tracking_number", "")
-
+    # Si téléphone fourni, vérifier que ça correspond au client
     if phone:
-        phone = normalize_phone(phone)
-        if phone == client_phone:
-            return jsonify({
-                "commande": order_number,
-                "statut": statut,
-                "client": f"{client.get('first_name', '')} {client.get('last_name', '')}",
-                "email": client.get("email", ""),
-                "articles": articles,
-                "total": f"{total} MAD",
-                "suivi": tracking_info
-            })
-        else:
-            return jsonify({"error": "Le numéro de téléphone ne correspond pas à la commande."}), 403
+        client = order.get("customer")
+        if not client:
+            return jsonify({"message": "Impossible de retrouver le client."}), 404
 
-    return jsonify({
-        "commande": order_number,
-        "statut": statut,
-        "suivi": tracking_info,
-        "message": "📍 Pour obtenir plus de détails ou le suivi du colis, merci de saisir le téléphone utilisé lors de la commande."
-    })
+        client_phone = normalize_phone(client.get("phone", ""))
+        input_phone = normalize_phone(phone)
+
+        if client_phone != input_phone:
+            return jsonify({"message": "Numéro de téléphone incorrect."}), 403
+
+    response = format_order_response(order)
+    return jsonify(response)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
