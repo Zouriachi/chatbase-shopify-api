@@ -43,3 +43,4 @@ def get_product_info():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
