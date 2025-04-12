@@ -1,13 +1,13 @@
 from flask import Flask
 from routes import orders
 from routes import products
-from routes import product_info
+from routes import variant_info
 app = Flask(__name__)
 
 # Enregistrement des blueprints
 app.register_blueprint(orders.order_bp)
 app.register_blueprint(products.products_bp)
-app.register_blueprint(product_info.product_info_bp)
+app.register_blueprint(variant_info.variant_info_bp)
 
 
 if __name__ == "__main__":
