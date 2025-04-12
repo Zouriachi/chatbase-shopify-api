@@ -1,7 +1,7 @@
-
 import os
 import requests
 from flask import Flask, request, jsonify
+from collections import OrderedDict
 
 app = Flask(__name__)
 
@@ -45,17 +45,15 @@ def get_order_status():
         for tracking_number in fulfillment.get("tracking_numbers", []):
             tracking_numbers.append(tracking_number)
 
-from collections import OrderedDict
+    response_data = OrderedDict([
+        ("commande", order.get("name")),
+        ("statut", statut),
+        ("total", total_price),
+        ("articles", articles),
+        ("tracking", tracking_numbers)
+    ])
 
-response_data = OrderedDict([
-    ("commande", order.get("name")),
-    ("statut", statut),
-    ("total", total_price),
-    ("articles", articles),
-    ("tracking", tracking_numbers)
-])
-
-return jsonify(response_data)
+    return jsonify(response_data)
 
 
 if __name__ == "__main__":
