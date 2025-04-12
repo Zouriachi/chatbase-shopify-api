@@ -14,19 +14,24 @@ HEADERS = {
 
 @products_bp.route("/products", methods=["GET"])
 def get_all_products():
-    
-    print("SHOPIFY_STORE_NAME =", SHOPIFY_STORE_NAME)
-    print("SHOPIFY_ADMIN_TOKEN =", SHOPIFY_ADMIN_TOKEN)
+    try:
+        print("SHOPIFY_STORE_NAME =", SHOPIFY_STORE_NAME)
+        print("SHOPIFY_ADMIN_TOKEN =", SHOPIFY_ADMIN_TOKEN)
 
-    url = f"https://{SHOPIFY_STORE_NAME}.myshopify.com/admin/api/2023-10/products.json"
-    response = requests.get(url, headers=HEADERS)
-    
-    print("Status code:", response.status_code)
-    print("Response text:", response.text)
+        url = f"https://{SHOPIFY_STORE_NAME}.myshopify.com/admin/api/2023-10/products.json"
+        print("Calling URL:", url)
 
+        response = requests.get(url, headers=HEADERS)
 
-    
-    if response.status_code != 200:
-        return jsonify({"error": "Erreur lors de la récupération des produits."}), 500
+        print("Status code:", response.status_code)
+        print("Response text:", response.text)
 
-    return jsonify(response.json())
+        if response.status_code != 200:
+            return jsonify({"error": "Erreur lors de la récupération des produits."}), 500
+
+        return jsonify(response.json())
+
+    except Exception as e:
+        print("Exception caught:", e)
+        return jsonify({"error": f"Exception: {str(e)}"}), 500
+
