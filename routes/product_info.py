@@ -12,6 +12,11 @@ HEADERS = {
     "X-Shopify-Access-Token": SHOPIFY_ADMIN_TOKEN
 }
 
+
+def clean(text):
+    return text.lower().replace(" ", "").replace("cm", "").strip()
+
+
 @product_info_bp.route("/product-info", methods=["GET"])
 def get_product_info():
     title = request.args.get("title")
@@ -28,19 +33,25 @@ def get_product_info():
         if not data.get("products"):
             return jsonify({"error": "Produit non trouvé."}), 404
 
-        produit = data["products"][0]  # On prend le premier match
+        produit = data["products"][0]  # Premier match
+
+        cleaned_requested_size = clean(size)
 
         for variant in produit.get("variants", []):
-            if size.lower() in variant.get("title", "").lower():
+            if cleaned_requested_size in clean(variant.get("title", "")):
                 return jsonify({
                     "produit": produit.get("title"),
-                    "taille": size,
+                    "taille demandée": size,
+                    "variante trouvée": variant.get("title"),
                     "prix": variant.get("price") + " MAD",
-                    "disponible": not variant.get("inventory_quantity") == 0
+                    "disponible": variant.get("inventory_quantity", 0) > 0
                 })
 
-        return jsonify({"message": "Aucune variante trouvée pour cette taille."})
+        return jsonify({
+            "produit": produit.get("title"),
+            "taille demandée": size,
+            "message": "Aucune variante trouvée correspondant à la taille indiquée."
+        })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
