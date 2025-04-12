@@ -14,8 +14,13 @@ HEADERS = {
 
 @products_bp.route("/products", methods=["GET"])
 def get_all_products():
+    
+    print("SHOPIFY_STORE_NAME =", SHOPIFY_STORE_NAME)
+    print("SHOPIFY_ADMIN_TOKEN =", SHOPIFY_ADMIN_TOKEN)
+
     url = f"https://{SHOPIFY_STORE_NAME}.myshopify.com/admin/api/2023-10/products.json"
     response = requests.get(url, headers=HEADERS)
+    
     print("Status code:", response.status_code)
     print("Response text:", response.text)
 
