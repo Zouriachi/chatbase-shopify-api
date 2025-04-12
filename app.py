@@ -14,7 +14,9 @@ def clean_phone(p):
 @app.route("/order-status", methods=["GET"])
 def order_status():
     order_number = request.args.get("order_number")
-    phone = request.args.get("phone")
+    from urllib.parse import unquote
+    phone = unquote(request.args.get("phone", ""))
+
 
     if not order_number or not phone:
         return jsonify({"error": "Merci de fournir à la fois le numéro de commande et le numéro de téléphone."}), 400
