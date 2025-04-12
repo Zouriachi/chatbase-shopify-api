@@ -17,6 +17,10 @@ HEADERS = {
 }
 
 def normalize_phone(phone):
+     if not phone:
+        return ""
+    return ''.join(filter(str.isdigit, phone))
+
     phone = ''.join(filter(str.isdigit, phone))  # Remove non-digits
     if phone.startswith('0'):
         phone = '+212' + phone[1:]
@@ -30,6 +34,10 @@ def normalize_phone(phone):
 def get_order_status():
     order_number = unquote(request.args.get("order_number", ""))
     phone = unquote(request.args.get("phone", ""))
+
+    client = order.get("customer")
+    if not client:
+    return jsonify({"message": "Impossible de retrouver le client."}), 404
 
     if not order_number:
         return jsonify({"error": "order_number is required"}), 400
