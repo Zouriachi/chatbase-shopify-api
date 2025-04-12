@@ -1,7 +1,7 @@
 from flask import Flask
 from routes import orders
 from routes import products
-
+from routes import product_info
 app = Flask(__name__)
 
 # Enregistrement des blueprints
