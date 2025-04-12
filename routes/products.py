@@ -16,6 +16,10 @@ HEADERS = {
 def get_all_products():
     url = f"https://{SHOPIFY_STORE_NAME}.myshopify.com/admin/api/2023-10/products.json"
     response = requests.get(url, headers=HEADERS)
+    print("Status code:", response.status_code)
+    print("Response text:", response.text)
+
+
     
     if response.status_code != 200:
         return jsonify({"error": "Erreur lors de la récupération des produits."}), 500
