@@ -30,6 +30,11 @@ def get_product_info():
         response = requests.get(url, headers=HEADERS)
         data = response.json()
 
+        # 🐛 DEBUG — afficher tous les titres reçus
+        print("🟡 Titres des produits reçus de Shopify :")
+        for prod in data.get("products", []):
+            print("-", prod.get("title"))
+
         if not data.get("products"):
             return jsonify({"error": "Produit non trouvé."}), 404
 
@@ -54,4 +59,5 @@ def get_product_info():
         })
 
     except Exception as e:
+        print("🔴 Erreur attrapée :", e)
         return jsonify({"error": str(e)}), 500
