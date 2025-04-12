@@ -1,5 +1,5 @@
-from .order_status import order_status
-from .products import products
+from .orders import order_bp
+from .products import products_bp
 
 
 
