@@ -3,7 +3,7 @@ import requests
 import os
 from collections import OrderedDict
 
-commandes_bp = Blueprint("commandes", __name__)
+orders_bp = Blueprint("orders", __name__)
 
 SHOPIFY_STORE_NAME = os.getenv("SHOPIFY_STORE_NAME")
 SHOPIFY_ADMIN_TOKEN = os.getenv("SHOPIFY_ADMIN_TOKEN")
