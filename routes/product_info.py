@@ -17,7 +17,7 @@ def clean(text):
     return text.lower().replace(" ", "").replace("cm", "").strip()
 
 
-@product_info_bp.route("/product-info", methods=["GET"])
+@product_info_bp.route("/product_info", methods=["GET"])
 def get_product_info():
     title = request.args.get("title")
     size = request.args.get("size")
