@@ -50,4 +50,4 @@ def get_variant_info():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-ify({"error": str(e)}), 500
+
