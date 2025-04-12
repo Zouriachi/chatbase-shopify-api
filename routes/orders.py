@@ -23,7 +23,7 @@ def get_order_by_name(order_number):
     return None
 
 
-@commandes_bp.route("/order-status", methods=["GET"])
+@order_bp.route("/order-status", methods=["GET"])
 def get_order_status():
     order_number = request.args.get("order_number")
     if not order_number:
