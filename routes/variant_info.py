@@ -15,7 +15,7 @@ HEADERS = {
 def clean(text):
     return text.lower().replace(" ", "").replace("cm", "").strip()
 
-@variant_info_bp.route("/variant-info", methods=["GET"])
+@variant_info_bp.route("/variant_info", methods=["GET"])
 def get_variant_info():
     title = request.args.get("title")
     variant_label = request.args.get("variant_label")
