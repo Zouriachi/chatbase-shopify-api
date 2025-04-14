@@ -39,7 +39,7 @@ def get_variant_info():
             if cleaned_label in clean(variant.get("title", "")):
                 return jsonify({
                     "produit": produit.get("title"),
-                    "variante": variant.get("tiltle"),
+                    "variante": variant.get("title"),
                     "prix": variant.get("price") + " MAD",
                     "disponible": variant.get("inventory_quantity", 0) > 0,
                     "variant_id": variant.get("id"),
@@ -50,5 +50,6 @@ def get_variant_info():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 
