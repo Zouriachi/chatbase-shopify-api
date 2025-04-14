@@ -17,14 +17,14 @@ def clean(text):
 
 @variant_info_bp.route("/variant-info", methods=["GET"])
 def get_variant_info():
-    handle = request.args.get("handle")
-    size = request.args.get("size")
+    title = request.args.get("title")
+    variant_label = request.args.get("variant_label")
 
-    if not handle or not size:
-        return jsonify({"error": "handle et size requis"}), 400
+    if not title or not variant_label:
+        return jsonify({"error": "title et variant_label requis"}), 400
 
     try:
-        url = f"https://{SHOPIFY_STORE_NAME}.myshopify.com/admin/api/2023-10/products.json?handle={handle}"
+        url = f"https://{SHOPIFY_STORE_NAME}.myshopify.com/admin/api/2023-10/products.json?title={title}"
         response = requests.get(url, headers=HEADERS)
         data = response.json()
 
@@ -33,21 +33,22 @@ def get_variant_info():
             return jsonify({"error": "Produit non trouvé"}), 404
 
         produit = products[0]
-        cleaned_size = clean(size)
+        cleaned_label = clean(variant_label)
 
         for variant in produit.get("variants", []):
-            if cleaned_size in clean(variant.get("title", "")):
+            if cleaned_label in clean(variant.get("title", "")):
                 return jsonify({
                     "produit": produit.get("title"),
-                    "taille": variant.get("title"),
+                    "variante": variant.get("title"),
                     "prix": variant.get("price") + " MAD",
                     "disponible": variant.get("inventory_quantity", 0) > 0,
                     "variant_id": variant.get("id"),
-                    "lien_complet": f"https://www.dwirty.ma/products/{handle}?variant={variant.get('id')}"
+                    "lien_complet": f"https://www.dwirty.ma/products/{produit.get('handle')}?variant={variant.get('id')}"
                 })
 
-        return jsonify({"error": "Variante non trouvée pour cette taille."}), 404
+        return jsonify({"error": "Variante non trouvée pour ce libellé."}), 404
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
