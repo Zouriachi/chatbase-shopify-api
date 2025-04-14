@@ -17,14 +17,14 @@ def clean(text):
 
 @variant_info_bp.route("/variant_info", methods=["GET"])
 def get_variant_info():
-    title = request.args.get("title")
+    handle = request.args.get("handle")
     variant_label = request.args.get("variant_label")
 
-    if not title or not variant_label:
-        return jsonify({"error": "title et variant_label requis"}), 400
+    if not handle or not variant_label:
+        return jsonify({"error": "handle et variant_label requis"}), 400
 
     try:
-        url = f"https://{SHOPIFY_STORE_NAME}.myshopify.com/admin/api/2023-10/products.json?title={title}"
+        url = f"https://{SHOPIFY_STORE_NAME}.myshopify.com/admin/api/2023-10/products.json?handle={handle}"
         response = requests.get(url, headers=HEADERS)
         data = response.json()
 
@@ -36,10 +36,10 @@ def get_variant_info():
         cleaned_label = clean(variant_label)
 
         for variant in produit.get("variants", []):
-            if cleaned_label in clean(variant.get("title", "")):
+            if cleaned_label in clean(variant.get("handle", "")):
                 return jsonify({
-                    "produit": produit.get("title"),
-                    "variante": variant.get("title"),
+                    "produit": produit.get("handle"),
+                    "variante": variant.get("handle"),
                     "prix": variant.get("price") + " MAD",
                     "disponible": variant.get("inventory_quantity", 0) > 0,
                     "variant_id": variant.get("id"),
