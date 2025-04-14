@@ -36,10 +36,10 @@ def get_variant_info():
         cleaned_label = clean(variant_label)
 
         for variant in produit.get("variants", []):
-            if cleaned_label in clean(variant.get("handle", "")):
+            if cleaned_label in clean(variant.get("title", "")):
                 return jsonify({
-                    "produit": produit.get("handle"),
-                    "variante": variant.get("handle"),
+                    "produit": produit.get("title"),
+                    "variante": variant.get("tiltle"),
                     "prix": variant.get("price") + " MAD",
                     "disponible": variant.get("inventory_quantity", 0) > 0,
                     "variant_id": variant.get("id"),
